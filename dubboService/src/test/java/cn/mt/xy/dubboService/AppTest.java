@@ -1,5 +1,11 @@
 package cn.mt.xy.dubboService;
 
+import java.util.List;
+
+import org.springframework.boot.SpringApplicationRunListener;
+import org.springframework.core.io.support.SpringFactoriesLoader;
+import org.springframework.util.ClassUtils;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -33,6 +39,11 @@ public class AppTest
      */
     public void testApp()
     {
-        assertTrue( true );
+    	System.out.println(ClassUtils.isPresent("cn.mt.xy.iface.MchtInfoServer", null));
+    }
+    
+    public void testApp2()
+    {
+    	
     }
 }

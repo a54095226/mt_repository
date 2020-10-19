@@ -1,0 +1,198 @@
+1.spring-boot启动流程
+	1.1主函数调用
+	ConfigurableApplicationContext ctx = SpringApplication.run(MySpringApplication.class, args);
+	
+	--------------------------------实例化对象-------------------------------------
+	1.2实例化SpringApplication对象
+	new SpringApplication(sources)
+	
+	1.3实例化时调用 
+	initialize(sources);
+	
+	1.4具体方法如下
+	//判断是否是web的环境
+	this.webEnvironment = deduceWebEnvironment();   -----1.4.1
+	//读取META-INF/spring.factories文件中配置的上下文初始化器ApplicationContextInitializer实例化并设置到SpringApplication的initializers集合中
+	setInitializers((Collection) getSpringFactoriesInstances(ApplicationContextInitializer.class));   -----1.4.2
+	//读取META-INF/spring.factories文件中配置的应用监听器ApplicationListener实例化并设置到SpringApplication的listeners集合中
+	setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+	//设置主类
+	this.mainApplicationClass = deduceMainApplicationClass();
+	
+		1.4.1 deduceWebEnvironment()方法
+		推断是否是web的环境，通过判断是否存在
+		private static final String[] WEB_ENVIRONMENT_CLASSES = { "javax.servlet.Servlet",
+			"org.springframework.web.context.ConfigurableWebApplicationContext" }; 这两个类，判断是否是web环境
+		例子中	mainApplicationClass = false;
+		
+		1.4.2 setInitializers()
+			  通过SpringFactoriesLoader的静态方法loadFactoryNames()加载classpath中的所有的上下文初始化器
+		      通过SpringApplication对象的createSpringFactoriesInstances()方法实例化所有的上下文初始化器
+			  setListeners()与setInitializers()方法类似
+	
+	--------------------------------执行SpringApplication对象run方法-------------------------------------	
+	1.5 具体方法如下
+	public ConfigurableApplicationContext run(String... args) {
+		//初始化计时器
+		StopWatch stopWatch = new StopWatch();
+		//计时器启动
+		stopWatch.start();
+		//
+		ConfigurableApplicationContext context = null;
+		FailureAnalyzers analyzers = null;
+		configureHeadlessProperty();
+		
+		//同上1.4.2 获取META-INF/spring.factories文件中配置的应用启动监听器SpringApplicationRunListeners并实例化
+		SpringApplicationRunListeners listeners = getRunListeners(args);
+		//监听器启动
+		listeners.starting();                                                                -----1.5.1
+		try {
+			ApplicationArguments applicationArguments = new DefaultApplicationArguments(
+					args);
+			
+			//准备环境对象
+			ConfigurableEnvironment environment = prepareEnvironment(listeners,
+					applicationArguments);
+					
+			//准备打印对象
+			Banner printedBanner = printBanner(environment);
+			
+			//创建上下文对象
+			context = createApplicationContext();
+			
+			//错误原因分析
+			analyzers = new FailureAnalyzers(context);
+			
+			//准备上下文对象
+			prepareContext(context, environment, listeners, applicationArguments,
+					printedBanner);
+					
+			//刷新上下文对象
+			refreshContext(context);
+			
+			//
+			afterRefresh(context, applicationArguments);
+			
+			//发布启动完成事件
+			listeners.finished(context, null);
+			
+			//计时器结束
+			stopWatch.stop();
+			
+			if (this.logStartupInfo) {
+				new StartupInfoLogger(this.mainApplicationClass)
+						.logStarted(getApplicationLog(), stopWatch);
+			}
+			return context;
+		}
+		catch (Throwable ex) {
+			handleRunFailure(context, listeners, analyzers, ex);
+			throw new IllegalStateException(ex);
+		}
+	}
+	
+	
+		1.5.1 listeners.starting() 遍历所有的应用启动监听器并执行每一个监听器的starting()方法
+		for (SpringApplicationRunListener listener : this.listeners) {
+			listener.starting();
+		}
+		在springboot项目中我们通过
+		List<String> listens  = SpringFactoriesLoader.loadFactoryNames(SpringApplicationRunListener.class, null);
+    	for(String l:listens)
+    	{
+    		System.out.println(l);
+    	}
+		获取到加载的默认SpringApplicationRunListener为org.springframework.boot.context.event.EventPublishingRunListener
+		EventPublishingRunListener其实就是一个事件发布的监听器
+		
+		public void starting() {
+		this.initialMulticaster
+				.multicastEvent(new ApplicationStartedEvent(this.application, this.args));
+		}
+		
+		
+		
+		最后执行的是之前加载的应用监听器
+		for (final ApplicationListener<?> listener : getApplicationListeners(event, type)) {
+			Executor executor = getTaskExecutor();
+			if (executor != null) {
+				executor.execute(new Runnable() {
+					@Override
+					public void run() {
+						invokeListener(listener, event);
+					}
+				});
+			}
+			else {
+				invokeListener(listener, event);
+			}
+		}
+		
+		
+		------------------最重要的refreshContext()方法为spring bean构建的核心方法-----------
+			@Override
+		public void refresh() throws BeansException, IllegalStateException {
+			synchronized (this.startupShutdownMonitor) {
+			// Prepare this context for refreshing.
+			prepareRefresh();
+
+			// Tell the subclass to refresh the internal bean factory.
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+			// Prepare the bean factory for use in this context.
+			prepareBeanFactory(beanFactory);
+
+			try {
+				// Allows post-processing of the bean factory in context subclasses.
+				postProcessBeanFactory(beanFactory);
+
+				// Invoke factory processors registered as beans in the context.
+				invokeBeanFactoryPostProcessors(beanFactory);
+
+				// Register bean processors that intercept bean creation.
+				registerBeanPostProcessors(beanFactory);
+
+				// Initialize message source for this context.
+				initMessageSource();
+
+				// Initialize event multicaster for this context.
+				initApplicationEventMulticaster();
+
+				// Initialize other special beans in specific context subclasses.
+				onRefresh();
+
+				// Check for listener beans and register them.
+				registerListeners();
+
+				// Instantiate all remaining (non-lazy-init) singletons.
+				finishBeanFactoryInitialization(beanFactory);
+
+				// Last step: publish corresponding event.
+				finishRefresh();
+			}
+
+			catch (BeansException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Exception encountered during context initialization - " +
+							"cancelling refresh attempt: " + ex);
+				}
+
+				// Destroy already created singletons to avoid dangling resources.
+				destroyBeans();
+
+				// Reset 'active' flag.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
+				throw ex;
+			}
+
+			finally {
+				// Reset common introspection caches in Spring's core, since we
+				// might not ever need metadata for singleton beans anymore...
+				resetCommonCaches();
+			}
+		}
+	}
+		
+	
