@@ -10,24 +10,31 @@
   <groupId>cn.mt.xy</groupId>
   <artifactId>dubboService</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <packaging>jar</packaging>
-
-  <name>dubboService</name>
-  <url>http://maven.apache.org</url>
+  <packaging>pom</packaging>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
-   <dependency>
+    <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+
+  
+   <dependency>
+      <groupId>cn.mt.xy</groupId>
+            <artifactId>dubboBean</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <modules>
+  	<module>dubbo-server</module>
+  </modules>
 </project>

@@ -1,4 +1,4 @@
-package cn.mt.xy.dubboBean;
+package org.dubbo.server;
 
 /**
  * Hello world!
