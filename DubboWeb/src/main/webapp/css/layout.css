@@ -1,0 +1,108 @@
+/* To unminify this script, go to http://www.svn2ftp.com/assets/css/layout.css?nomin=1 */
+@font-face{font-family:'BPreplayRegular';src:url('/assets/fonts/BPreplay.eot');
+src:local('BPreplay Regular'),local('BPreplay'),url('/assets/fonts/BPreplay.woff') 
+format('woff'),url('/assets/fonts/BPreplay.otf')
+ format('opentype'),
+ url('/assets/fonts/BPreplay.svg#BPreplay')
+ format('svg');}
+ body{background:url(../images/background_footer.jpg) 50% 0;font-family:Arial,Helvetica,sans-serif;}
+ caption{display:none;}
+ .ir{display:inline-block;text-indent:-999em;overflow:hidden;background-repeat:no-repeat;}
+ .irp{position:absolute;left:-9999em;overflow:hidden;font-size:0;line-height:0;}
+ .hidden{display:none;visibility:hidden;}
+ .tabs-hide{display:none;}
+ .visuallyhidden{position:absolute!important;clip:rect(1px 1px 1px 1px);clip:rect(1px,1px,1px,1px);}
+ .invisible{visibility:hidden;}
+ .clearfix:after{content:".";display:block;height:0;clear:both;visibility:hidden;}
+ .clearfix{display:block;}
+ #main{background:url(../images/background.jpg) 50% 0;padding:20px 0 60px;}
+ .container{width:960px;margin:0 auto;position:relative;}#main 
+ .container{min-height:576px;}
+ header{width:320px;position:absolute;top:0;left:320px;}
+ header h1{background:url(/assets/images/layout/logo.png) no-repeat 50% 0;width:320px;height:147px;margin:0 0 60px;opacity:.8;cursor:pointer;}
+ header a:hover h1{opacity:1;}
+ header a{display:block;width:320px;}
+ #chaps{background-image:url(../images/globe.png),url(../images/animation.gif);
+       background-repeat:no-repeat,no-repeat;
+	   background-position:49.5% 17px,0 100%;
+	   width:320px;
+	   height:360px;
+	   position:relative;
+	   cursor:pointer;}
+	   header a:hover #chaps{background-position:49.5% 0,0 100%;}
+	   #chaps span{display:block;background:url(../images/face_shadow.png) no-repeat;width:125px;height:43px;position:absolute;top:164px;left:100px;opacity:1;}
+	   header a:hover #chaps span{opacity:.4;}
+	   header small{display:block;background:url(../images/beta.png) no-repeat;width:75px;height:42px;position:absolute;top:140px;left:135px;}
+	   header #git{background:url(../images/git_sticker.png) no-repeat;width:95px;height:61px;position:absolute;top:140px;left:175px;}
+	   #nav_login,#main_content{width:320px;float:left;padding-top:40px;}
+	   #nav_login ul{padding-bottom:22px;padding-left:40px;}
+	   #nav_login nav li{font:18px/22px "BPreplayRegular",Arial,Helvetica,sans-serif;width:230px;}
+	   #nav_login nav li a{display:block;background:url(../images/nav.png) no-repeat 0 100%;color:#C5523A;width:192px;height:35px;padding:16px 16px 0 22px;}
+	   #nav_login nav li a:hover,#nav_login nav li.current a{background-position:0 0;color:#F2EFE8;}
+	   #nav_login nav li a span{display:block;background-position:100% 0;background-repeat:no-repeat;}
+	   #nav_login nav li a.n_home span{background-image:url(../images/i_home.png);background-position:98% 0;}
+	   #nav_login nav li a.n_blog span{background-image:url(../images/i_blog.png);}
+	   #nav_login nav li a.n_about span{background-image:url(../images/i_about.png);background-position:98% 0;}
+	   #nav_login nav li a.n_packages span{background-image:url(../images/i_pricing.png);background-position:99% 0;}
+	   #nav_login nav li a.n_contact span{background-image:url(../images/i_contact.png);background-position:100% 3px;}
+	   #nav_login nav li a.n_home:hover span,#nav_login nav li.current a.n_home span{background-position:98% -83px;}
+	   #nav_login nav li a.n_blog:hover span,#nav_login nav li.current a.n_blog span{background-position:100% -80px;}
+	   #nav_login nav li a.n_about:hover span,#nav_login nav li.current a.n_about span{background-position:98% -81px;}
+	   #nav_login nav li a.n_packages:hover span,#nav_login nav li.current a.n_packages span{background-position:99% -81px;}
+	   #nav_login nav li a.n_contact:hover span,#nav_login nav li.current a.n_contact span{background-position:100% -85px;}
+	   #nav_login nav li a strong{background:url(/assets/images/layout/logos_sml.png) no-repeat;display:inline-block;width:87px;height:17px;vertical-align:text-top;}
+	   #nav_login nav li a:hover strong,#nav_login nav li.current a strong{background-position:0 -17px;}
+	   #nav_login nav li small{display:block;position:absolute;}
+	   #nav_login nav li+li{position:relative;}
+	   #nav_login nav li .n_about+small{width:104px;height:77px;background:url(../images/including_text.png) no-repeat;top:20px;right:-106px;opacity:.5;}
+	   #nav_login nav li.current .n_about+small,#nav_login nav li .n_about:hover+small{opacity:1;}.terms header{position:static;top:auto;left:auto;width:230px;}
+	   .terms header h1{margin-bottom:0;background-position:44% 0;width:230px;background:url(/assets/images/layout/logos_sml.png) no-repeat 0 100%;height:17px;}
+	   .terms header a{width:230px;margin:5px 0 14px 40px;}
+	   .terms header small{top:12px;left:55px;z-index:1;opacity:.9;}
+	   .terms #chaps{display:none;}
+	   .terms #nav_login{padding-top:0;}
+	   .terms #main_content{float:left;width:680px;padding-top:16px;color:#333;padding-right:0;margin-left:-40px;position:relative;z-index:10;}
+	   .terms header #git,.terms #nav_login nav li .n_about+small{display:none;}
+	   #login{margin-left:40px;background:url(../images/line_red.png) no-repeat 0 0;padding-top:22px;width:320px;position:relative;}
+	   #login h3{font:18px/22px "BPreplayRegular",Arial,Helvetica,sans-serif;color:#333;margin-bottom:15px;padding-left:22px;}
+	   #login label{font-size:11px;line-height:14px;color:#333;padding-left:22px;display:block;margin-top:5px;}
+	   #login input[type="email"],#login input[type="password"],#login input[type="text"]{border:none;background:none;font:12px/14px "Courier New",Courier,monospace;color:#C5523A;outline:none;}
+	   #login input[type="email"],#login input[type="text"]{background:url(../images/input_email.png) no-repeat;width:201px;height:17px;padding:23px 0 23px 45px;margin-top:-7px;margin-bottom:-14px;}
+	   #login input[type="password"]{background:url(../images/input_password.png) no-repeat;width:185px;height:15px;margin-left:-10px;padding:10px 0 10px 55px;margin-top:5px;margin-bottom:8px;}
+	   #login button{padding:0;background:url(../images/button.png) no-repeat;width:105px;height:50px;border:none;color:#333;font-size:12px;line-height:14px;padding-bottom:18px;text-align:left;padding-left:17px;position:absolute;right:60px;bottom:-16px;}
+	   #login button:hover{background-position:0 100%;padding-bottom:16px;bottom:-17px;}#login div{font-size:11px;line-height:14px;color:#333;width:128px;padding-left:22px;position:relative;}
+	   #login div label{display:inline-block;margin-top:0;padding-left:0;cursor:pointer;}#login div a{color:#C5523A;display:inline-block;margin-left:10px;}
+	   #login div a:hover{color:#C00;}#login input[type="checkbox"]{margin:0;padding:0;position:absolute;top:0;left:1px;}
+	   #main_content{float:right;}footer{background:url(../images/footer.png) repeat-x;margin-top:-29px;position:relative;z-index:1;}
+	   #copyright{font-size:12px;line-height:14px;color:#333;padding-top:45px;margin-left:40px;}
+	   #copyright span{display:block;background:url(../images/line_grey.png) no-repeat 0 100%;padding:0 0 27px 22px;}
+	   #copyright strong{display:inline-block;background:url(/assets/images/layout/logos_sml.png) no-repeat 0 -34px;width:87px;height:17px;vertical-align:bottom;margin-left:5px;}
+	   #copyright nav ul{padding:27px 0 40px;}
+	   #copyright nav li{display:inline-block;padding-left:22px;}
+	   #copyright nav li a{color:#666;}
+	   #copyright nav li a:hover{color:#333;}
+	   #copyright #social{position:absolute;top:41px;left:210px;}
+	   #copyright #social li{display:inline-block;width:25px;height:25px;margin-left:5px;}
+	   #copyright #social li a{background:url(../images/icon_f.png) no-repeat;width:25px;height:25px;display:block;opacity:.75;}
+	   #copyright #social li a:hover{opacity:1;}
+	   #copyright #social li#twitter a{background:url(../images/icon_t.png) no-repeat;}
+	   #credits{width:250px;position:absolute;top:0;right:30px;background:url(../images/footer_line.png) no-repeat 105px 0;height:165px;}
+	   #credits div{font-size:12px;line-height:14px;color:#666;padding-top:45px;background:url(/assets/images/layout/curved_arrow.png) no-repeat 80px 52px;}
+	   #credits div a{display:block;background:url(/assets/images/layout/paypal.png) no-repeat;width:102px;height:26px;margin:10px 0 0 -13px;opacity:.6;}
+	   #credits div ul{width:88px;line-height:1px;padding-top:15px;}
+	   #credits div li{display:inline-block;width:42px;height:26px;margin:0 2px 2px 0;}
+	   #credits div .visa{background:url(/assets/images/layout/cc_visa.png) no-repeat;}
+	   #credits div .mastercard{background:url(/assets/images/layout/cc_master.png) no-repeat;}
+	   #credits div .amex{background:url(/assets/images/layout/cc_amex.png) no-repeat;}
+	   #credits div .discover{background:url(/assets/images/layout/cc_discover.png) no-repeat;}
+	   #credits div a:hover{opacity:1;}
+	   #credits #who_did_it{background:url(../images/kabd_back.png) no-repeat 50% 50%;width:120px;height:60px;position:absolute;top:45px;right:8px;}
+	   #credits #who_did_it li{background:url(../images/kabd_button.png) no-repeat;width:55px;height:52px;float:left;position:relative;margin-left:-3px;}
+	   #credits #who_did_it li#kevadamson{margin-top:7px;}#credits #who_did_it li:hover{background-position:0 100%;height:54px;}
+	   #credits #who_did_it li a{display:block;width:55px;height:52px;}
+	   #credits #who_did_it li#kevadamson a{background:url(../images/ka.png) no-repeat 13px 8px;}
+	   #credits #who_did_it li#kevadamson a:hover{background-position:13px 12px;height:54px;}
+	   #credits #who_did_it li#bd a{background:url(../images/bd.png) no-repeat 15px 9px;}
+	   #credits #who_did_it li#bd a:hover{background-position:15px 13px;height:54px;}
+	   #sotd{display:block;position:absolute;left:-93px;top:30px;width:71px;height:120px;background:url(/assets/images/layout/sotd.png) no-repeat;opacity:.8;outline:none;}
+	   #sotd:hover{opacity:.9;}
