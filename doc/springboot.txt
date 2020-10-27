@@ -194,5 +194,76 @@
 			}
 		}
 	}
+	
+	
+	
+	
+	-----------------初始化bean--------------
+	整体流程
+	1. InstantiationAwareBeanPostProcessor postProcessBeforeInstantiation......
+		执行InstantiationAwareBeanPostProcessor对象的postProcessBeforeInstantiation方法
+		（InstantiationAwareBeanPostProcessor接口中自定义的方法，bean对象实例化之前，bean对象还不存在）
+		postProcessBeforeInstantiation方法是最先执行的方法，它在目标对象实例化之前调用，该方法的返回值类型是Object，我们可以返回任何类型的值。
+		由于这个时候目标对象还未实例化，所以这个返回值可以用来代替原本该生成的目标对象的实例(比如代理对象)。
+		如果该方法的返回值代替原本该生成的目标对象，后续只有postProcessAfterInitialization方法会调用，其它方法不再调用；---------------------------------------------
+	                                            ↓                                                                                                                    ↓
+	2. MchtServerImpl construtor......                                                                                                                               ↓
+		bean对象实例化                                                                                                                                               ↓
+	                                            ↓
+	3. InstantiationAwareBeanPostProcessor postProcessAfterInstantiation......                                                                                       ↓
+		执行InstantiationAwareBeanPostProcessor对象的postProcessAfterInstantiation方法
+		（InstantiationAwareBeanPostProcessor接口中自定义的方法，bean对象实例化之后，bean对象已存在）                                                                ↓
+	                                            ↓
+	4. InstantiationAwareBeanPostProcessor postProcessPropertyValues......
+		执行InstantiationAwareBeanPostProcessor对象的postProcessPropertyValues方法                                                                                   ↓
+		（InstantiationAwareBeanPostProcessor接口中自定义的方法，可修改bean对象的属性值）                                                                       
+	                                            ↓											
+	5. MchtServerImpl set property.....                                                                                                                              ↓
+		bean对象设置属性
+	                                            ↓											
+	6. BeanNameAware setBeanName.....
+		bean对象如果实现了BeanNameAware接口执行setBeanName方法设置bean名称                                                                                           ↓
+	                                            ↓	
+	7. BeanFactoryAware setBeanFactory.....
+		bean对象如果实现了BeanFactoryAware接口执行setBeanFactory方法设置beanFactory
+	                                            ↓												
+	8. BeanPostProcessor postProcessBeforeInitialization...... 
+	    执行BeanPostProcessor对象的postProcessBeforeInitialization 方法，在执行init-method方法前执行                                                                 ↓
+	                                            ↓											
+	9. InstantiationAwareBeanPostProcessor postProcessBeforeInitialization...... 
+	    执行InstantiationAwareBeanPostProcessor对象的postProcessBeforeInitialization 方法，在执行init-method方法前执行
+		由于InstantiationAwareBeanPostProcessor继承自BeanPostProcessor接口，每一个InstantiationAwareBeanPostProcessor对象都是一个BeanPostProcessor对象
+	                                            ↓	
+	10. MchtServerImpl init-method......
+	    执行bean定义的初始化方法                                                                                                                                     ↓
+	                                            ↓											                                                                         ↓	
+	11. BeanPostProcessor postProcessAfterInitialization......                                                                                                      ←
+	    执行BeanPostProcessor对象的 postProcessAfterInitialization 方法，在执行init-method方法后执行
+	                                            ↓												
+	12. InstantiationAwareBeanPostProcessor postProcessAfterInitialization......
+	    执行 InstantiationAwareBeanPostProcessor 对象的 postProcessAfterInitialization 方法，在执行init-method方法后执行
+	    同9                                       										
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+												
+	  
 		
 	
