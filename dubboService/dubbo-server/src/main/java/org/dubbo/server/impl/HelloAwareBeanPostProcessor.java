@@ -38,17 +38,18 @@ public class HelloAwareBeanPostProcessor implements InstantiationAwareBeanPostPr
 	@Override
 	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
 		System.out.println(" InstantiationAwareBeanPostProcessor postProcessBeforeInstantiation......");
-		try {
-			return beanClass.newInstance();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
+		return null;
+//		try {
+//			return beanClass.newInstance();
+//		} catch (InstantiationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return null;
+//		} catch (IllegalAccessException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return null;
+//		}
 	}
 
 	/**

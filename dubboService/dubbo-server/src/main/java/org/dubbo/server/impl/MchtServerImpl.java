@@ -4,10 +4,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanNameAware;
+import org.springframework.beans.factory.InitializingBean;
 
 import cn.mt.xy.iface.MchtInfoServer;
 
-public class MchtServerImpl implements MchtInfoServer,BeanNameAware,BeanFactoryAware{
+public class MchtServerImpl implements MchtInfoServer,BeanNameAware,BeanFactoryAware,InitializingBean{
 	
 	private String name;
 	private String beanName;
@@ -46,6 +47,12 @@ public class MchtServerImpl implements MchtInfoServer,BeanNameAware,BeanFactoryA
 		// TODO Auto-generated method stub
 		System.out.println(" BeanFactoryAware setBeanFactory.....");
 		this.bf= beanFactory;
+		
+	}
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		
+		System.out.println(" InitializingBean afterPropertiesSet.....");
 		
 	}
 

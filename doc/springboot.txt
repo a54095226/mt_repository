@@ -198,8 +198,17 @@
 	
 	
 	
-	-----------------初始化bean--------------
-	整体流程
+	------------------------初始化所有非懒加载的单例bean------------------------
+	
+	// Instantiate all remaining (non-lazy-init) singletons.
+	finishBeanFactoryInitialization(beanFactory);
+	主要的方法为 
+	BeanFactory.getBean(beanNm) 实际对象为 DefaultListableBeanFactory.getBean(beanNm);
+	
+	
+	
+	-----------------初始化bean整体流程--------------
+	
 	1. InstantiationAwareBeanPostProcessor postProcessBeforeInstantiation......
 		执行InstantiationAwareBeanPostProcessor对象的postProcessBeforeInstantiation方法
 		（InstantiationAwareBeanPostProcessor接口中自定义的方法，bean对象实例化之前，bean对象还不存在）
@@ -233,37 +242,402 @@
 	9. InstantiationAwareBeanPostProcessor postProcessBeforeInitialization...... 
 	    执行InstantiationAwareBeanPostProcessor对象的postProcessBeforeInitialization 方法，在执行init-method方法前执行
 		由于InstantiationAwareBeanPostProcessor继承自BeanPostProcessor接口，每一个InstantiationAwareBeanPostProcessor对象都是一个BeanPostProcessor对象
-	                                            ↓	
-	10. MchtServerImpl init-method......
+	                                            ↓
+	10. InitializingBean afterPropertiesSet..... 
+	    bean对象如果实现了InitializingBean接口，则执行 InitializingBean 的 afterPropertiesSet 方法
+	                                            ↓												
+	11. MchtServerImpl init-method......
 	    执行bean定义的初始化方法                                                                                                                                     ↓
 	                                            ↓											                                                                         ↓	
-	11. BeanPostProcessor postProcessAfterInitialization......                                                                                                      ←
+	12. BeanPostProcessor postProcessAfterInitialization......                                                                                                      ←
 	    执行BeanPostProcessor对象的 postProcessAfterInitialization 方法，在执行init-method方法后执行
 	                                            ↓												
-	12. InstantiationAwareBeanPostProcessor postProcessAfterInitialization......
+	13. InstantiationAwareBeanPostProcessor postProcessAfterInitialization......
 	    执行 InstantiationAwareBeanPostProcessor 对象的 postProcessAfterInitialization 方法，在执行init-method方法后执行
 	    同9                                       										
 												
 												
+	
+
+	
+	------------------beanFactory三级缓存----------
+	//一级缓存
+	private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(256);
+
+	//三级缓存
+	/** Cache of singleton factories: bean name --> ObjectFactory */
+	private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16);
+
+	//二级缓存
+	/** Cache of early singleton objects: bean name --> bean instance */
+	private final Map<String, Object> earlySingletonObjects = new HashMap<String, Object>(16);
+	
+	
+	-------------------初始化实例--------------											
+	<bean id="simpleBeanMcht" class="org.dubbo.server.impl.SimpleBeanMcht">
+		<property name="oprInfoServer" ref="simpleBeanOpr"></property>
+	</bean>
+    <bean id="simpleBeanOpr" class="org.dubbo.server.impl.SimpleBeanOpr">
+		<property name="mchtInfoServer" ref="simpleBeanMcht"></property>
+	</bean>
+
+	1. getBean("simpleBeanMcht");                        -----DefaultListableBeanFactory(AbstractBeanFactory) 对象方法
+	   初始化 simpleBeanMcht 入口											
 												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-												
-	  
+	2. doGetBean(name, null, null, false);               -----DefaultListableBeanFactory(AbstractBeanFactory) 对象方法
+	   实际执行方法
+	
+	3. getSingleton(beanName, true);                     -----DefaultListableBeanFactory(DefaultSingletonBeanRegistry) 对象方法
+         尝试从缓存中获取bean，simpleBeanMcht 还没有创建，返回为空
 		
+		protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		//从一级缓存中获取bean
+		Object singletonObject = this.singletonObjects.get(beanName);
+		//如果没有获取到，则判断在正在创建对象 singletonsCurrentlyInCreation 集合中存在
+		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			synchronized (this.singletonObjects) {
+				//从二级缓存中获取bean
+				singletonObject = this.earlySingletonObjects.get(beanName);
+				if (singletonObject == null && allowEarlyReference) {
+				//从三级缓存中获取bean
+					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+					if (singletonFactory != null) {
+						singletonObject = singletonFactory.getObject();
+						this.earlySingletonObjects.put(beanName, singletonObject);
+						this.singletonFactories.remove(beanName);
+					}
+				}
+			}
+		}
+		return (singletonObject != NULL_OBJECT ? singletonObject : null);
+		}
+		
+	4. markBeanAsCreated(String beanName)                ----DefaultListableBeanFactory(AbstractBeanFactory)										
+		添加 要创建的bean名称 simpleBeanMcht 到 alreadyCreated 集合中	
+
+	5. 	sharedInstance = getSingleton(beanName, new ObjectFactory<Object>() {                ----DefaultListableBeanFactory(AbstractBeanFactory)
+
+						@Override
+						public Object getObject() throws BeansException {
+							try {
+								return createBean(beanName, mbd, args);
+							}
+							catch (BeansException ex) {
+								// Explicitly remove instance from singleton cache: It might have been put there
+								// eagerly by the creation process, to allow for circular reference resolution.
+								// Also remove any beans that received a temporary reference to the bean.
+								destroySingleton(beanName);
+								throw ex;
+							}
+						}
+					});
+
+		构建一个内部类对象，并作为参数传给 getSingleton 方法
+		new ObjectFactory<Object>() 是一个回调方法对象
+		beanFactory通过 getSingleton 方法，调用内部类的 getObject 方法
+		getObject又回调 beanFactory 的 createBean 方法完成创建bean
+	
+	6. public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {     ----DefaultListableBeanFactory(DefaultSingletonBeanRegistry)
+		Assert.notNull(beanName, "'beanName' must not be null");
+		synchronized (this.singletonObjects) {
+		    //同步一级缓存并再次从一级缓存查找 simpleBeanMcht 对象
+			Object singletonObject = this.singletonObjects.get(beanName);
+			if (singletonObject == null) {
+				if (this.singletonsCurrentlyInDestruction) {
+					throw new BeanCreationNotAllowedException(beanName,
+							"Singleton bean creation not allowed while singletons of this factory are in destruction " +
+							"(Do not request a bean from a BeanFactory in a destroy method implementation!)");
+				}
+				if (logger.isDebugEnabled()) {
+					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
+				}
+				
+				//将 simpleBeanMcht 名称添加到 singletonsCurrentlyInCreation 集合中
+				beforeSingletonCreation(beanName);
+				boolean newSingleton = false;
+				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
+				if (recordSuppressedExceptions) {
+					this.suppressedExceptions = new LinkedHashSet<Exception>();
+				}
+				try {
+				    //核心 调用内部类的回调方法 getObject
+					singletonObject = singletonFactory.getObject();
+					newSingleton = true;
+				}
+				catch (IllegalStateException ex) {
+					// Has the singleton object implicitly appeared in the meantime ->
+					// if yes, proceed with it since the exception indicates that state.
+					singletonObject = this.singletonObjects.get(beanName);
+					if (singletonObject == null) {
+						throw ex;
+					}
+				}
+				catch (BeanCreationException ex) {
+					if (recordSuppressedExceptions) {
+						for (Exception suppressedException : this.suppressedExceptions) {
+							ex.addRelatedCause(suppressedException);
+						}
+					}
+					throw ex;
+				}
+				finally {
+					if (recordSuppressedExceptions) {
+						this.suppressedExceptions = null;
+					}
+					afterSingletonCreation(beanName);
+				}
+				if (newSingleton) {
+					addSingleton(beanName, singletonObject);
+				}
+			}
+			return (singletonObject != NULL_OBJECT ? singletonObject : null);
+		}
+	}											
+												
+		6.1 singletonFactory.getObject(); 
+			在5中描述了getObject又回调 beanFactory 的 createBean 方法完成创建bean
+			
+	7. protected Object createBean(String beanName, RootBeanDefinition mbd, Object[] args) ----DefaultListableBeanFactory(AbstractAutowireCapableBeanFactory)
+		开始创建bean 
+		
+	8.	Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
+		实例化之前执行 InstantiationAwareBeanPostProcessors 中的 applyBeanPostProcessorsBeforeInstantiation >>>>>>对应流程中的1
+		
+		protected Object resolveBeforeInstantiation(String beanName, RootBeanDefinition mbd) {
+		Object bean = null;
+		if (!Boolean.FALSE.equals(mbd.beforeInstantiationResolved)) {
+			// Make sure bean class is actually resolved at this point.
+			if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+				Class<?> targetType = determineTargetType(beanName, mbd);
+				if (targetType != null) {
+					bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
+					if (bean != null) {
+					//需要注意的是如果 applyBeanPostProcessorsAfterInitialization 返回一个对象
+					 //之后直接执行 applyBeanPostProcessorsAfterInitialization 并返回 此对象（比如一个代理对象）
+						bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+					}
+				}
+			}
+			mbd.beforeInstantiationResolved = (bean != null);
+		}
+		return bean;
+	}
+												
+	9. Object beanInstance = doCreateBean(beanName, mbdToUse, args);
+       真正创建bean的方法
+		
+		protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final Object[] args)  ----DefaultListableBeanFactory(AbstractAutowireCapableBeanFactory)
+			throws BeanCreationException {
+
+		//9.1 定义一个bean的包装类
+		// 此包装类主要用来设置 bean的属性值
+		BeanWrapper instanceWrapper = null;
+		if (mbd.isSingleton()) {
+			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
+		}
+		if (instanceWrapper == null) {
+		    //9.2 实例化包装类对象
+			//调用 SimpleBeanMcht 类的无参构造函数实例化 simpleBeanMcht 对象并封装成一个包装对象                   >>>>>>对应流程中的2
+			instanceWrapper = createBeanInstance(beanName, mbd, args);
+		}
+		
+		//9.3 获取真正的bean simpleBeanMcht 
+		final Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
+		
+		//9.4 获取simpleBeanMcht 类型
+		Class<?> beanType = (instanceWrapper != null ? instanceWrapper.getWrappedClass() : null);
+		mbd.resolvedTargetType = beanType;
+
+		// Allow post-processors to modify the merged bean definition.
+		synchronized (mbd.postProcessingLock) {
+			if (!mbd.postProcessed) {
+				try {
+					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
+				}
+				catch (Throwable ex) {
+					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+							"Post-processing of merged bean definition failed", ex);
+				}
+				mbd.postProcessed = true;
+			}
+		}
+
+		// Eagerly cache singletons to be able to resolve circular references
+		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
+				isSingletonCurrentlyInCreation(beanName));
+		if (earlySingletonExposure) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Eagerly caching bean '" + beanName +
+						"' to allow for resolving potential circular references");
+			}
+			//9.5 构建一个内部类ObjectFactory对象 并添加到三级缓存 singletonFactories 中
+			// 用于提前暴露，解决循环依赖问题
+			addSingletonFactory(beanName, new ObjectFactory<Object>() {
+				@Override
+				public Object getObject() throws BeansException {
+					return getEarlyBeanReference(beanName, mbd, bean);
+				}
+			});
+		}
+
+		// Initialize the bean instance.
+		Object exposedObject = bean;
+		try {
+		    //9.6 初始化 simpleBeanMcht 对象 ，给刚实例化的 simpleBeanMcht 对象设置属性值
+			populateBean(beanName, mbd, instanceWrapper);
+			if (exposedObject != null) {
+				exposedObject = initializeBean(beanName, exposedObject, mbd);
+			}
+		}
+		catch (Throwable ex) {
+			if (ex instanceof BeanCreationException && beanName.equals(((BeanCreationException) ex).getBeanName())) {
+				throw (BeanCreationException) ex;
+			}
+			else {
+				throw new BeanCreationException(
+						mbd.getResourceDescription(), beanName, "Initialization of bean failed", ex);
+			}
+		}
+
+		if (earlySingletonExposure) {
+			Object earlySingletonReference = getSingleton(beanName, false);
+			if (earlySingletonReference != null) {
+				if (exposedObject == bean) {
+					exposedObject = earlySingletonReference;
+				}
+				else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
+					String[] dependentBeans = getDependentBeans(beanName);
+					Set<String> actualDependentBeans = new LinkedHashSet<String>(dependentBeans.length);
+					for (String dependentBean : dependentBeans) {
+						if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
+							actualDependentBeans.add(dependentBean);
+						}
+					}
+					if (!actualDependentBeans.isEmpty()) {
+						throw new BeanCurrentlyInCreationException(beanName,
+								"Bean with name '" + beanName + "' has been injected into other beans [" +
+								StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
+								"] in its raw version as part of a circular reference, but has eventually been " +
+								"wrapped. This means that said other beans do not use the final version of the " +
+								"bean. This is often the result of over-eager type matching - consider using " +
+								"'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.");
+					}
+				}
+			}
+		}
+
+		// Register bean as disposable.
+		try {
+			registerDisposableBeanIfNecessary(beanName, bean, mbd);
+		}
+		catch (BeanDefinitionValidationException ex) {
+			throw new BeanCreationException(
+					mbd.getResourceDescription(), beanName, "Invalid destruction signature", ex);
+		}
+
+		return exposedObject;
+	}
+												
+	10. populateBean(beanName, mbd, instanceWrapper);											
+		初始化 simpleBeanMcht 对象 ，给刚实例化的 simpleBeanMcht 对象设置属性值
+		
+        //遍历所有的InstantiationAwareBeanPostProcessor 接口对象并执行 postProcessAfterInstantiation 方法 >>>>>>对应流程中的3
+		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
+			for (BeanPostProcessor bp : getBeanPostProcessors()) {
+				if (bp instanceof InstantiationAwareBeanPostProcessor) {
+					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+					if (!ibp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
+						continueWithPropertyPopulation = false;
+						break;
+					}
+				}
+			}
+		}
+		
+		//遍历所有的InstantiationAwareBeanPostProcessor 接口对象并执行 postProcessPropertyValues 方法 >>>>>>对应流程中的4
+		for (BeanPostProcessor bp : getBeanPostProcessors()) {
+					if (bp instanceof InstantiationAwareBeanPostProcessor) {
+						InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+						pvs = ibp.postProcessPropertyValues(pvs, filteredPds, bw.getWrappedInstance(), beanName);
+						if (pvs == null) {
+							return;
+						}
+					}
+			
+	11. applyPropertyValues(beanName, mbd, bw, pvs);                                                >>>>>>对应流程中的5 
+		simpleBeanMcht 对象属性初始化
+		
+		//11.1 实例化一个 bean定义中值的处理器
+		BeanDefinitionValueResolver valueResolver = new BeanDefinitionValueResolver(this, beanName, mbd, converter);
+		
+		//11.2 遍历beanDefinition中的所有的属性定义
+		// simpleBeanMcht 对象有一个属性  OprInfoServer oprInfoServer;
+		for (PropertyValue pv : original) {
+			if (pv.isConverted()) {
+				deepCopy.add(pv);
+			}
+			else {
+				//11.3 获取属性名称 oprInfoServer
+				String propertyName = pv.getName();
+				
+				//11.4 获取属性值 由于 oprInfoServer 属性也是一个bean 所有获取到的 originalValue 为一个 RuntimeBeanReference 引用对象
+				Object originalValue = pv.getValue();
+				
+				//11.5 处理 oprInfoServer 属性
+				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
+				
+				Object convertedValue = resolvedValue;
+				boolean convertible = bw.isWritableProperty(propertyName) &&
+						!PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName);
+				if (convertible) {
+					convertedValue = convertForProperty(resolvedValue, propertyName, bw, converter);
+				}
+				// Possibly store converted value in merged bean definition,
+				// in order to avoid re-conversion for every created bean instance.
+				if (resolvedValue == originalValue) {
+					if (convertible) {
+						pv.setConvertedValue(convertedValue);
+					}
+					deepCopy.add(pv);
+				}
+				else if (convertible && originalValue instanceof TypedStringValue &&
+						!((TypedStringValue) originalValue).isDynamic() &&
+						!(convertedValue instanceof Collection || ObjectUtils.isArray(convertedValue))) {
+					pv.setConvertedValue(convertedValue);
+					deepCopy.add(pv);
+				}
+				else {
+					resolveNecessary = true;
+					deepCopy.add(new PropertyValue(pv, convertedValue));
+				}
+			}
+		}
+												
+												
+	 12. valueResolver.resolveValueIfNecessary(pv, originalValue);                   ------BeanDefinitionValueResolver.resolveValueIfNecessary
+	     处理 oprInfoServer 属性
+		 
+		 //判断属性值类型 当前属性 oprInfoServer 为 RuntimeBeanReference 类型
+	    if (value instanceof RuntimeBeanReference) {
+			RuntimeBeanReference ref = (RuntimeBeanReference) value;
+			return resolveReference(argName, ref);
+		}
+		
+		
+
+	13. resolveReference(Object argName, RuntimeBeanReference ref)                  ------BeanDefinitionValueResolver.resolveReference
+        具体处理方法
+		
+		//调用beanFactory 方法获取 oprInfoServer 对象
+		Object bean = this.beanFactory.getBean(refName);
+		
+	14. 此时 按照 上面的流程 再创建一个 oprInfoServer 实例
+	
+	    ------------------缓存中的对象------------------
+		一级缓存 singletonObjects >>>
+		二级缓存 earlySingletonObjects >>>
+		三级缓存 singletonFactories >>> 	ObjectFactory<simpleBeanMcht> , ObjectFactory<simpleBeanOpr>
+		----------------------------------------------------
+	
 	

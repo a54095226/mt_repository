@@ -9,8 +9,8 @@ public class TestMain {
 	public static void main(String[] args)
 	{
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("application.xml");
-		MchtInfoServer server = (MchtInfoServer)ctx.getBean("mchtServer");
-		System.out.println(server.getMchtNm("111"));
+		MchtInfoServer server = (MchtInfoServer)ctx.getBean("simpleBeanMcht");
+		System.out.println(server.getMchtNm("11111111"));
 		ctx.close();
 	}
 
