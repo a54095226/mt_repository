@@ -274,21 +274,24 @@
 	
 	
 	-------------------初始化实例--------------											
-	<bean id="simpleBeanMcht" class="org.dubbo.server.impl.SimpleBeanMcht">
-		<property name="oprInfoServer" ref="simpleBeanOpr"></property>
+	<bean id="mchtServer" class="org.dubbo.server.impl.SimpleBeanMcht">
+		<property name="oprServer" ref="simpleBeanOpr"></property>
 	</bean>
-    <bean id="simpleBeanOpr" class="org.dubbo.server.impl.SimpleBeanOpr">
-		<property name="mchtInfoServer" ref="simpleBeanMcht"></property>
+    <bean id="oprServer" class="org.dubbo.server.impl.SimpleBeanOpr">
+		<property name="mchtServer" ref="simpleBeanMcht"></property>
 	</bean>
+	
+	定义了两个bean ：mchtServer ，oprServer 他们相互依赖
+	
 
-	1. getBean("simpleBeanMcht");                        -----DefaultListableBeanFactory(AbstractBeanFactory) 对象方法
-	   初始化 simpleBeanMcht 入口											
+	1. getBean("mchtServer");                        -----DefaultListableBeanFactory(AbstractBeanFactory) 对象方法
+	   初始化 mcht 入口											
 												
-	2. doGetBean(name, null, null, false);               -----DefaultListableBeanFactory(AbstractBeanFactory) 对象方法
+	2. doGetBean(mchtServer, null, null, false);               -----DefaultListableBeanFactory(AbstractBeanFactory) 对象方法
 	   实际执行方法
 	
-	3. getSingleton(beanName, true);                     -----DefaultListableBeanFactory(DefaultSingletonBeanRegistry) 对象方法
-         尝试从缓存中获取bean，simpleBeanMcht 还没有创建，返回为空
+	3. getSingleton(mchtServer, true);                     -----DefaultListableBeanFactory(DefaultSingletonBeanRegistry) 对象方法
+         尝试从缓存中获取 mchtServer 还没有创建，返回为空
 		
 		protected Object getSingleton(String beanName, boolean allowEarlyReference) {
 		//从一级缓存中获取bean
@@ -312,8 +315,8 @@
 		return (singletonObject != NULL_OBJECT ? singletonObject : null);
 		}
 		
-	4. markBeanAsCreated(String beanName)                ----DefaultListableBeanFactory(AbstractBeanFactory)										
-		添加 要创建的bean名称 simpleBeanMcht 到 alreadyCreated 集合中	
+	4. markBeanAsCreated(mchtServer)                ----DefaultListableBeanFactory(AbstractBeanFactory)										
+		添加 要创建的bean名称 mchtServer 到 alreadyCreated 集合中	
 
 	5. 	sharedInstance = getSingleton(beanName, new ObjectFactory<Object>() {                ----DefaultListableBeanFactory(AbstractBeanFactory)
 
@@ -340,7 +343,7 @@
 	6. public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {     ----DefaultListableBeanFactory(DefaultSingletonBeanRegistry)
 		Assert.notNull(beanName, "'beanName' must not be null");
 		synchronized (this.singletonObjects) {
-		    //同步一级缓存并再次从一级缓存查找 simpleBeanMcht 对象
+		    //同步一级缓存并再次从一级缓存查找 mchtServer 对象
 			Object singletonObject = this.singletonObjects.get(beanName);
 			if (singletonObject == null) {
 				if (this.singletonsCurrentlyInDestruction) {
@@ -352,7 +355,7 @@
 					logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
 				}
 				
-				//将 simpleBeanMcht 名称添加到 singletonsCurrentlyInCreation 集合中
+				//将 mchtServer 名称添加到 singletonsCurrentlyInCreation 集合中
 				beforeSingletonCreation(beanName);
 				boolean newSingleton = false;
 				boolean recordSuppressedExceptions = (this.suppressedExceptions == null);
@@ -437,11 +440,11 @@
 		}
 		if (instanceWrapper == null) {
 		    //9.2 实例化包装类对象
-			//调用 SimpleBeanMcht 类的无参构造函数实例化 simpleBeanMcht 对象并封装成一个包装对象                   >>>>>>对应流程中的2
+			//调用 mchtServer 类的无参构造函数实例化 mchtServer 对象并封装成一个包装对象                   >>>>>>对应流程中的2
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		
-		//9.3 获取真正的bean simpleBeanMcht 
+		//9.3 获取真正的bean mchtServer 
 		final Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
 		
 		//9.4 获取simpleBeanMcht 类型
@@ -572,19 +575,19 @@
 		BeanDefinitionValueResolver valueResolver = new BeanDefinitionValueResolver(this, beanName, mbd, converter);
 		
 		//11.2 遍历beanDefinition中的所有的属性定义
-		// simpleBeanMcht 对象有一个属性  OprInfoServer oprInfoServer;
+		// simpleBeanMcht 对象有一个属性   oprServer;
 		for (PropertyValue pv : original) {
 			if (pv.isConverted()) {
 				deepCopy.add(pv);
 			}
 			else {
-				//11.3 获取属性名称 oprInfoServer
+				//11.3 获取属性名称 oprServer
 				String propertyName = pv.getName();
 				
-				//11.4 获取属性值 由于 oprInfoServer 属性也是一个bean 所有获取到的 originalValue 为一个 RuntimeBeanReference 引用对象
+				//11.4 获取属性值 由于 oprServer 属性也是一个bean 所有获取到的 originalValue 为一个 RuntimeBeanReference 引用对象
 				Object originalValue = pv.getValue();
 				
-				//11.5 处理 oprInfoServer 属性
+				//11.5 处理 oprServer 属性
 				Object resolvedValue = valueResolver.resolveValueIfNecessary(pv, originalValue);
 				
 				Object convertedValue = resolvedValue;
@@ -616,9 +619,9 @@
 												
 												
 	 12. valueResolver.resolveValueIfNecessary(pv, originalValue);                   ------BeanDefinitionValueResolver.resolveValueIfNecessary
-	     处理 oprInfoServer 属性
+	     处理 oprServer 属性
 		 
-		 //判断属性值类型 当前属性 oprInfoServer 为 RuntimeBeanReference 类型
+		 //判断属性值类型 当前属性 oprServer 为 RuntimeBeanReference 类型
 	    if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
 			return resolveReference(argName, ref);
@@ -629,15 +632,419 @@
 	13. resolveReference(Object argName, RuntimeBeanReference ref)                  ------BeanDefinitionValueResolver.resolveReference
         具体处理方法
 		
-		//调用beanFactory 方法获取 oprInfoServer 对象
+		//调用beanFactory 方法获取 oprServer 对象
 		Object bean = this.beanFactory.getBean(refName);
 		
-	14. 此时 按照 上面的流程 再创建一个 oprInfoServer 实例
+	14. 此时 按照 上面的流程 再创建一个 oprServer 实例
 	
 	    ------------------缓存中的对象------------------
 		一级缓存 singletonObjects >>>
 		二级缓存 earlySingletonObjects >>>
 		三级缓存 singletonFactories >>> 	ObjectFactory<simpleBeanMcht> , ObjectFactory<simpleBeanOpr>
 		----------------------------------------------------
+		
+	15. oprServer	创建成功后，需要给oprServer对象初始化属性 mchtServer
+	
+	     按照1的步骤，同样调用 getSingleton 方法获取对象 mchtServer
+		
+		protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		Object singletonObject = this.singletonObjects.get(beanName);
+		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			synchronized (this.singletonObjects) {
+				singletonObject = this.earlySingletonObjects.get(beanName);
+				if (singletonObject == null && allowEarlyReference) {
+					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
+					if (singletonFactory != null) {
+						singletonObject = singletonFactory.getObject();
+						this.earlySingletonObjects.put(beanName, singletonObject);
+						this.singletonFactories.remove(beanName);
+					}
+				}
+			}
+		}
+		return (singletonObject != NULL_OBJECT ? singletonObject : null);
+	}
+	
+	    15.1 从缓存中寻找，由于 当前一级缓存，二级缓存没有 mchtServer 
+			 从三级缓存中 获取 mchtServer 对象，等到一个内部类对象
+			 new ObjectFactory<Object>() {
+				@Override
+				public Object getObject() throws BeansException {
+					return getEarlyBeanReference(beanName, mbd, bean);
+				}
+				});
+		15.2. 调用内部类对象的   getObject() 方法，回调
+	     getEarlyBeanReference(mchtServer, mbd, bean); 方法
+		 这个方法其实是用于得到目标对象的代理对象（如果存在代理）
+		 
+		15.3 将得到的代理对象 放入二级缓存，从三级缓存中移除
+		
+		 ------------------缓存中的对象------------------
+		一级缓存 singletonObjects >>>
+		二级缓存 earlySingletonObjects >>>  Proxy(mchtServer)
+		三级缓存 singletonFactories >>> 	 ObjectFactory<oprServer>
+		----------------------------------------------------
+	
+	16. 将得到的 mchtServer 对象设置为 oprServer 属性
+	
+	17. oprServer 对象创建完成
+		 
+	18. beanFactory.initializeBean(oprServer, exposedObject, mbd);	 
+	    
+	   
+	    18.1 beanFactory.invokeAwareMethods(oprServer)   
+            		执行aware方法                                            >>>对应流程 6-7
+		
+		18.2 beanFactory.applyBeanPostProcessorsBeforeInitialization(oprServer)    
+		    执行 BeanPostProcessor postProcessBeforeInitialization 方法            >>>对应流程 8-9
+		
+		18.3 beanFactory.invokeInitMethods(oprServer, wrappedBean, mbd);     
+		    执行 InitializingBean 接口方法,执行 init-method 方法                >>>对应流程 10-11
+		
+		18.4 beanFactory.applyBeanPostProcessorsAfterInitialization(wrappedBean,oprServer);  
+            执行 BeanPostProcessor postProcessAfterInitialization 方法      		   >>>对应流程 12-13
+			
+	19 . getSingleton(oprServer, false); 查询当前对象 是否在 二级缓存中                                    
+	    
+		//尝试从一级、二级缓存中获取对象，如果有则替换对象，
+			//此时没有，则直接返回 oprServer 对象
+			Object earlySingletonReference = getSingleton(oprServer, false);
+			if (earlySingletonReference != null) {
+				if (exposedObject == bean) {
+					exposedObject = earlySingletonReference;
+	
+			
+	20. createBean(oprServer) 执行完成，返回 到 beanFactory.getSingleton(oprServer, new ObjectFactory<Object>())
+	     执行addSingleton(beanName, singletonObject);
+		 
+		    一级缓存添加 对象 oprServer
+			二三级缓存移除 oprServer 对象
+		    this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
+			this.singletonFactories.remove(beanName);
+			this.earlySingletonObjects.remove(beanName);
+			this.registeredSingletons.add(beanName);
+		
+		 ------------------缓存中的对象------------------
+		一级缓存 singletonObjects >>> oprServer
+		二级缓存 earlySingletonObjects >>>  Proxy(mchtServer)
+		三级缓存 singletonFactories >>> 	
+		----------------------------------------------------
+		
+	21. 	beanFactory.getSingleton(oprServer, new ObjectFactory<Object>()) 执行完成，返回到 getSingleton 方法中
+	
+	        
+			
+	22.  oprServer 对象创建完成，按照之前的步骤给 mchtServer 设置属性 oprServer   
+	     populateBean(mchtServer, mbd, instanceWrapper);返回
+	     
+	
+	23.   getSingleton(mchtServer, false);  
+	    尝试从二级缓存中获取 mchtServer ，当前获取到 ，则用二级缓存中的对象 替换当前bean 作为 mchtServer bean
+		
+    24. createBean(mchtServer) 执行完成，返回 到 beanFactory.getSingleton(mchtServer, new ObjectFactory<Object>())
+	     执行addSingleton(beanName, singletonObject);
+		 
+		    一级缓存添加 对象 mchtServer（二级缓存中的对象）
+			二三级缓存移除 mchtServer 对象
+		    this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
+			this.singletonFactories.remove(beanName);
+			this.earlySingletonObjects.remove(beanName);
+			this.registeredSingletons.add(beanName);
+		
+		 ------------------缓存中的对象------------------
+		一级缓存 singletonObjects >>> oprServer,Proxy(mchtServer) 
+		二级缓存 earlySingletonObjects >>>  
+		三级缓存 singletonFactories >>> 	
+		----------------------------------------------------
+		                                                         ↑
+    --------------------------------------------------两个循环依赖对象创建完成--------------------------------------------------------	
+	
+	
+		----------------------getBean整体方法调用流程-----------------
+		'-->': 方法调用
+		'A': beanName
+		'B': beanName
+		
+		>>beanFactory.getBean(A)
+		-->beanFactory.doGetBean(A, Class<T>, Object[], boolean)
+		
+		   -->beanFactory.getSingleton(A, new ObjectFactory<Object>())
+		   
+		      -->objectFactory.getObject()
+			  
+				 -->beanFactory.createBean(A, mbd, args)
+				 
+					-->beanFactory.resolveBeforeInstantiation(A, RootBeanDefinition mbd)                            -----流程1 执行 InstantiationAwareBeanPostProcessor.postProcessBeforeInstantiation 方法
+			           beanFactory.doCreateBean(A, mbdToUse, args);
+					   
+					   -->beanFactory.createBeanInstance(A, mbdToUse, args);                                        -----流程2 使用无参构造函数实例化 A
+						  beanFactory.addSingletonFactory(A, new ObjectFactory<Object>())                           -----将A对象封装成一个内部类 ObjectFactory 对象放入第三缓存
+			              populateBean(A, mbd, instanceWrapper);
+						  
+			              -->InstantiationAwareBeanPostProcessor.postProcessAfterInstantiation(A)                   -----流程3 执行 InstantiationAwareBeanPostProcessor.postProcessAfterInstantiation 方法                     
+					         InstantiationAwareBeanPostProcessor.postProcessPropertyValues(A)                       -----流程4 执行 InstantiationAwareBeanPostProcessor.postProcessPropertyValues 方法    
+                             beanFactory.applyPropertyValues(A, mbd, bw, pvs);			                            -----流程5 初始化对象A属性
+		
+		               -->beanFactory.initializeBean(A, exposedObject, mbd);
+					   
+					      -->beanFactory.invokeAwareMethods(A)                                                      -----流程6-7 执行 Aware 接口方法
+						     beanFactory.applyBeanPostProcessorsBeforeInitialization(wrappedBean, A);               -----流程8-9 执行 BeanPostProcessor postProcessBeforeInitialization 方法
+							 beanFactory.invokeInitMethods(A, wrappedBean, mbd);        
+							 
+		                     -->((InitializingBean) bean).afterPropertiesSet();                                     -----流程10 执行 InitializingBean 接口方法
+							     beanFactory.invokeCustomInitMethod(A, bean, mbd);                                  -----流程11 执行 init-method 自定义初始化方法
+								 
+						  -->beanFactory.applyBeanPostProcessorsAfterInitialization(wrappedBean,A);                 -----流程12-13 执行 BeanPostProcessor postProcessAfterInitialization 接口方法
+						  
+					   -->beanFactory.getSingleton(A, false);                                                       -----尝试从二级缓存中获取 A 对象， 如果有 则替换当前 A对象 并返回（一般是A的代理对象）
+		
+			  -->addSingleton(beanName, singletonObject);                                                           -----返回到 getSingleton 方法中
+			                                                                                                             将bean从二级缓存、三级缓存中移除，添加到一级缓存，对象创建成功
+			                                                                                                              
+		
+		
+		循环依赖简单流程：
+		
+		A->B
+		B->A
+		 
+		1. A实例化 ，放一个能获取A对象(或代理对象 ProxyA )的对象 FactoryA 放入 第三缓存
+		
+		2. A设置B属性，B初始化 ，放一个能获取B对象(或代理对象ProxyB)的对象FactoryB 放入 第三缓存
+		
+		3. B设置A属性，从第三缓存中获取到了 A对象的 FactoryA ,调用 FactoryA 的get方法 获取到 A(或代理对象 ProxyA)，放入第二缓存，并设置为A属性 
+		      B.A = A（ProxyA）
+			  
+	    4. B初始化完成，检查 B是否在第二缓存中，当前B不在第二缓存，则返回B 
+		    
+		5. 完成B对象的所有操作，将B对象从第三缓存移除，放入第一缓存，并设置为 A 的 B 属性
+		       A.B = B
+			   
+		6. A初始化完成，检查 A是否在第二缓存中，当前A在第二缓存，则用第二缓存中的对象（A或代理对象 ProxyA）替换 A ，返回A
+		
+		7. 完成A对象的所有操作，将A对象从第二缓存移除，放入第一缓存，并返回 A(或ProxyA)
+		
+		
+		
+		
+		
+		
+		---------------spring aop---------------
+		
+		准备知识
+		
+		1.关于 finally 中的方法何时执行
+		
+		public class TestFinal {
+	
+			int num = 1;
+	
+			public int getNum()
+			{
+				System.out.println(" getNum invoke ");
+				num++;
+				return num;
+			}
+	
+			public void doFinally()
+			{
+				System.out.println(" doFinally ");
+				num++;
+			}
+	
+			public int getCount()
+			{
+			try{
+				return getNum();
+				}finally
+				{
+				doFinally();
+				}
+			}
+	
+			public static void main(String[] args) {
+				TestFinal fin = new TestFinal();
+				System.out.println(fin.getCount());   //这里打印 2还是3？
+			}
+
+		}
+		
+		//分析上面的代码
+		 0  aload_0 [this]                                                          //将本地变量表0 位置的 值推入操作数栈（当前对象地址）
+         1  invokevirtual org.dubbo.server.test.TestFinal.getNum() : int [38]       //弹出栈顶的值this，执行 getNum 方法，将结果放入 栈顶 2
+		 4  istore_2                                                                //弹出栈顶数 2 ，保存到本地变量表  2 位置
+		 5  aload_0 [this]                                                          //将本地变量表0 位置的 值推入操作数栈（当前对象地址）
+		 6  invokevirtual org.dubbo.server.test.TestFinal.doFinally() : void [40]   //弹出栈顶的值this，执行 doFinally 方法，将结果放入 栈顶 3
+		 9  iload_2                                                                 //本地变量表2 位置的 值推入操作数栈（2）
+		 10  ireturn                                                                //返回栈顶（2）
+		 -----异常处理字节码-----                                                   
+		 11  astore_1
+		 12  aload_0 [this]
+		 13  invokevirtual org.dubbo.server.test.TestFinal.doFinally() : void [40]
+		 16  aload_1
+		 17  athrow
+		 -----异常表-----
+		 Exception Table:
+        [pc: 0, pc: 5] -> 11 when : any                                             //pc:0 异常发生的开始指令
+		                                                                            //pc:5 异常发生的结束指令
+																					//-> 11 :异常发生时跳转的目标指令
+																					// when : any     异常类型，任何异常
+																					//当在0-5 指令执行时抛出异常，与当前表里面的异常类型一致，则跳到 11行指令
+		
+		
+		//所以上面的方法打印
+			>>getNum invoke 
+			>>doFinally 
+			>>2
+		
+		
+		
+		2. 关于责任链模式
+		
+		--------------------------------方法拦截器抽象------------------------------------
+		public interface MethodInterceptor {
+            //执行过滤器
+			public Object invoke(MethodInvocation methodInvocation);
+		}
+		
+		--------------------------------两个拦截器实现类----------------------------------
+		//方法之前执行执行的拦截器
+		public class MethodBeforeAdviceInterceptor implements MethodInterceptor{
+			@Override
+			public Object invoke(MethodInvocation methodInvocation) {
+				System.out.println(" MethodBeforeAdviceInterceptor invoke...");                       //前置方法
+				return methodInvocation.proceed();
+			}
+		}
+		
+		//方法执行后拦截器
+		public class AspectJAfterAdvice implements MethodInterceptor{
+			@Override
+			public Object invoke(MethodInvocation methodInvocation) {
+				try {
+				return methodInvocation.proceed();
+				}
+			finally {
+				System.out.println(" AspectJAfterAdvice invoke... ");                                 //后置方法
+				}
+			}
+		}
+		
+		--------------------------------责任链方法执行抽象------------------------
+		public interface MethodInvocation {
+			//执行责任链方法
+			public Object proceed();
+			}
+
+		--------------------------------实现责任链方法执行器---------------------
+		public class ReflectiveMethodInvocation implements MethodInvocation{
+            private TestFinal target;   //目标方法
+			private MethodInterceptor[] methodInterceptors ;  //拦截器
+			int currentIdx;                                   //当前执行拦截器索引
+	
+			public ReflectiveMethodInvocation(TestFinal target)
+			{
+				this.target = target;
+				methodInterceptors = new MethodInterceptor[]{new AspectJAfterAdvice(),new MethodBeforeAdviceInterceptor()};
+				currentIdx = 0;
+			}
+	
+			@Override
+			public Object proceed() {
+				//拦截器执行完毕，执行目标方法
+				if(currentIdx==methodInterceptors.length)
+					{
+					return target.getNum();                                                    
+					}
+		
+				MethodInterceptor currentInterceptor = methodInterceptors[currentIdx++];
+				return currentInterceptor.invoke(this);
+			}
+	
+			public static void main(String[] args) {
+				ReflectiveMethodInvocation mi = new ReflectiveMethodInvocation(new TestFinal());
+				//责任链方法执行
+				mi.proceed();
+				}
+		}
+		
+		执行过程：
+		
+		>>>>ReflectiveMethodInvocation.proceed()
+		
+			--->AspectJAfterAdvice.invoke(MethodInvocation methodInvocation)
+			
+				--->ReflectiveMethodInvocation.proceed()
+				
+					--->MethodBeforeAdviceInterceptor.invoke(MethodInvocation methodInvocation)
+					
+						--->MethodBeforeAdviceInterceptor.beforeMethod                          //前置方法
+						
+						--->ReflectiveMethodInvocation.proceed()
+						
+							--->target.method()  												 //目标对象方法
+		
+				--->AspectJAfterAdvice.afterMethod()										     //后置方法
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		------------ spring boot 启动原理---- 
+		一.在context = createApplicationContext(); 构建 org.springframework.context.annotation.AnnotationConfigApplicationContext 对象时，
+		   （具体是在AnnotationConfigApplicationContext 默认构造函数中的 new AnnotatedBeanDefinitionReader(this) 中实现）
+		   public AnnotationConfigApplicationContext() {
+				this.reader = new AnnotatedBeanDefinitionReader(this);
+				this.scanner = new ClassPathBeanDefinitionScanner(this);
+				}
+		   默认向beanfactory注册了以下一些 beandefinitions
+			0 = "org.springframework.context.annotation.internalConfigurationAnnotationProcessor"
+			1 = "org.springframework.context.annotation.internalAutowiredAnnotationProcessor"
+			2 = "org.springframework.context.annotation.internalRequiredAnnotationProcessor"
+			3 = "org.springframework.context.annotation.internalCommonAnnotationProcessor"
+			4 = "org.springframework.context.event.internalEventListenerProcessor"
+			5 = "org.springframework.context.event.internalEventListenerFactory"
+		   
+		二.分析注册 beandefinition 过程
+		invokeBeanFactoryPostProcessors(beanFactory);是注册注解配置的bean的入口
+		
+		查找beandefinitions中定义的  BeanDefinitionRegistryPostProcessor 
+		其中 名称为org.springframework.context.annotation.internalConfigurationAnnotationProcessor 的  
+		org.springframework.context.annotation.ConfigurationClassPostProcessor 实现了 BeanDefinitionRegistryPostProcessor 接口
+		
+		于是先创建bean的单例对象，并执行
+		ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry 方法 的作用就是解析 带有@Configuration 注解的 beandefinitions  中
+			
+			@PropertySource
+			
+			@ComponentScan 
+			
+			@Import
+			
+			@Bean
+			
+			注解
+			
+		Spring boot 使用 starter 方式启动其他组件，正是由于
+		
+		@SpringBootApplication 注解 ，包含 @EnableAutoConfiguration 注解 ，包含 @Import({EnableAutoConfigurationImportSelector.class})
+		
+		而 EnableAutoConfigurationImportSelector 会根据 文件 META/spring.factories 文件，返回需要注册的 bean 对象。
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	
 	

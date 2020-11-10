@@ -18,15 +18,8 @@ public class MySpringApplication {
 	public static void main(String[] args)
 	{
 		ConfigurableApplicationContext ctx = SpringApplication.run(MySpringApplication.class, args);
-		
 		MchtInfoServer server = ctx.getBean(MchtInfoServer.class);
 		System.out.println(server.getMchtNm(""));
-		
-		List<String> listens  = SpringFactoriesLoader.loadFactoryNames(SpringApplicationRunListener.class, null);
-    	for(String l:listens)
-    	{
-    		System.out.println(l);
-    	}
 		
 	}
 

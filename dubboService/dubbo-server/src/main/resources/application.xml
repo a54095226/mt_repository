@@ -10,15 +10,33 @@
 		http://www.springframework.org/schema/aop/spring-aop-4.2.xsd 
 		http://www.springframework.org/schema/tx 
 		http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+		
+	<bean id="helloBean" class="org.dubbo.server.impl.HelloBean">
+	</bean>
+	<bean id="helloAcpectBean" class="org.dubbo.server.aop.HelloAcpect">
+	</bean>
+	
+	<!-- 第一个*代表bai所有的返du值zhi类型
+第二个*代表所有的类
+第三个*代表类所有方法
+最后一个..代表所有的参数。 -->
+	<aop:config>
+	 <aop:aspect id="helloAcpect" ref="helloAcpectBean">
+	    <aop:pointcut id="helloPc" expression="execution(* *.*(..))"/>
+	    <aop:before method="beforeSay" pointcut-ref="helloPc"/>
+	    <aop:after method="afterSay" pointcut-ref="helloPc"/>
+	 </aop:aspect>
+	</aop:config>
 
-	<bean id="simpleBeanMcht" class="org.dubbo.server.impl.SimpleBeanMcht">
+	<!--<bean id="simpleBeanMcht" class="org.dubbo.server.impl.SimpleBeanMcht">
 		<property name="oprInfoServer" ref="simpleBeanOpr"></property>
 	</bean>
+	
     <bean id="simpleBeanOpr" class="org.dubbo.server.impl.SimpleBeanOpr">
 		<property name="mchtInfoServer" ref="simpleBeanMcht"></property>
 	</bean>
 
-	<!--<bean id="mchtServer" class="org.dubbo.server.impl.MchtServerImpl" init-method="init_method"> 
+	<bean id="mchtServer" class="org.dubbo.server.impl.MchtServerImpl" init-method="init_method"> 
 		<property name="name" ref="test"></property> </bean> <bean id="helloBeanPostProcesser" 
 		class="org.dubbo.server.impl.HelloBeanPostProcesser" > </bean> <bean id="helloAwareBeanPostProcessor.java" 
 		class="org.dubbo.server.impl.HelloAwareBeanPostProcessor" > </bean> -->
