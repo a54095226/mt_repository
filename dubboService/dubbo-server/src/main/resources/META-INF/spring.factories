@@ -1,0 +1,2 @@
+org.springframework.context.ApplicationContextInitial=org.dubbo.server.init.HelloApplicationContextInitial
+org.springframework.context.ApplicationListener=org.dubbo.server.init.HelloApplictionContextListener

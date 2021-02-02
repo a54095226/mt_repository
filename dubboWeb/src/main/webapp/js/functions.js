@@ -1,2 +1,0 @@
-/* To unminify this script, go to http://svn2ftp.com/assets/scripts/functions.js?nomin=1 */
-$(document).ready(function(){if($(".comparison").length>0){$(".comparison").colorbox({scrolling:false})}$("#tabs").tabs()});

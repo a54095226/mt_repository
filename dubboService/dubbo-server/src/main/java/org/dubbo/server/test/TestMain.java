@@ -8,7 +8,7 @@ public class TestMain {
 	
 	public static void main(String[] args)
 	{
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("application.xml");
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("ttttttapplication.xml");
 		MchtInfoServer server = (MchtInfoServer)ctx.getBean("helloBean");
 		System.out.println(server.getMchtNm("11111111"));
 		ctx.close();

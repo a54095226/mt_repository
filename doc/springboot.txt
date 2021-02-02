@@ -96,7 +96,7 @@
 		for (SpringApplicationRunListener listener : this.listeners) {
 			listener.starting();
 		}
-		在springboot项目中我们通过
+		在 springboot 项目中我们通过
 		List<String> listens  = SpringFactoriesLoader.loadFactoryNames(SpringApplicationRunListener.class, null);
     	for(String l:listens)
     	{
@@ -995,7 +995,9 @@
 		
 		
 		
-		------------ spring boot 启动原理---- 
+		------------ spring boot 启动注册 beanDefinition 原理----
+
+		
 		一.在context = createApplicationContext(); 构建 org.springframework.context.annotation.AnnotationConfigApplicationContext 对象时，
 		   （具体是在AnnotationConfigApplicationContext 默认构造函数中的 new AnnotatedBeanDefinitionReader(this) 中实现）
 		   public AnnotationConfigApplicationContext() {
@@ -1003,7 +1005,7 @@
 				this.scanner = new ClassPathBeanDefinitionScanner(this);
 				}
 		   默认向beanfactory注册了以下一些 beandefinitions
-			0 = "org.springframework.context.annotation.internalConfigurationAnnotationProcessor"
+			0 = "org.springframework.context.annotation.internalConfigurationAnnotationProcessor"     
 			1 = "org.springframework.context.annotation.internalAutowiredAnnotationProcessor"
 			2 = "org.springframework.context.annotation.internalRequiredAnnotationProcessor"
 			3 = "org.springframework.context.annotation.internalCommonAnnotationProcessor"
@@ -1035,6 +1037,13 @@
 		@SpringBootApplication 注解 ，包含 @EnableAutoConfiguration 注解 ，包含 @Import({EnableAutoConfigurationImportSelector.class})
 		
 		而 EnableAutoConfigurationImportSelector 会根据 文件 META/spring.factories 文件，返回需要注册的 bean 对象。
+
+		总体流程
+        		>>>注册 BeanDefinitionRegistryPostProcessor 接口 实现 ConfigurationClassPostProcessor 的beandefinition，用于解析 @Configuration @Bean @Import 等注解
+
+        		>>>在从beandefinition 到 bean的 构建之前执行
+        			invokeBeanFactoryPostProcessors(beanFactory);
+        			执行 ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) 解析注解并注册 beandefinition
 		
 		
 		

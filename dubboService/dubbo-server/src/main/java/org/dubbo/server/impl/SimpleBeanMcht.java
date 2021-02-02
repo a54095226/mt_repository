@@ -1,9 +1,10 @@
 package org.dubbo.server.impl;
 
+
 import cn.mt.xy.iface.MchtInfoServer;
 import cn.mt.xy.iface.OprInfoServer;
 
-public class SimpleBeanMcht implements MchtInfoServer{
+public class SimpleBeanMcht implements MchtInfoServer {
 
 	private OprInfoServer oprInfoServer;
 	
