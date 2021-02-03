@@ -5,19 +5,9 @@
     <parent>
         <artifactId>dubboService</artifactId>
         <groupId>cn.mt.xy</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dubb-bean</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
-
-    </dependencies>
 </project>
