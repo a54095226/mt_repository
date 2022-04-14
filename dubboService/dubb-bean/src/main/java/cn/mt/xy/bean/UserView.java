@@ -5,6 +5,7 @@ public class UserView {
     private String userId;
     private String userNm;
     private String passwd;
+    private String alias;
 
     public UserView()
     {
@@ -34,4 +35,6 @@ public class UserView {
     public void setPasswd(String passwd) {
         this.passwd = passwd;
     }
+
+
 }
